@@ -144,9 +144,30 @@ members_final <- members_wf %>%
 
 members_final
 
+collect_metrics(members_final)
 
+collect_predictions(members_final) %>%
+        conf_mat(died, .pred_class)
 
+members_final %>%
+        pull(.workflow) %>%
+        pluck(1) %>%
+        tidy(exponentiate = TRUE) %>%
+        arrange(estimate) %>%
+        kable(digits = 3)
 
-
-
-
+members_final %>%
+        pull(.workflow) %>%
+        pluck(1) %>%
+        tidy() %>%
+        filter(term != "(Intercept)") %>%
+        ggplot(aes(estimate, fct_reorder(term, estimate))) +
+        geom_vline(xintercept = 0, color = "gray50", lty = 2, size = 1.2) +
+        geom_errorbar(aes(
+                xmin = estimate - std.error,
+                xmax = estimate + std.error
+        ),
+        width = .2, color = "gray50", alpha = 0.7
+        ) +
+        geom_point(size = 2, color = "#85144B") +
+        labs(y = NULL, x = "Coefficent from logistic regression")
