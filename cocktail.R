@@ -83,7 +83,7 @@ tidied_pca %>%
         )
 
 juice(pca_prep) %>%
-        ggplot(aes(PC1, PC3, label = name)) +
+        ggplot(aes(PC2, PC4, label = name)) +
         geom_point(aes(color = category), alpha = 0.7, size = 2) +
         geom_text(check_overlap = TRUE, hjust = "inward", family = "IBMPlexSans") +
         labs(color = NULL)
@@ -103,7 +103,11 @@ umap_prep <- prep(umap_rec)
 
 umap_prep
 
-
+juice(umap_prep) %>%
+        ggplot(aes(umap_1, umap_2, label = name)) +
+        geom_point(aes(color = category), alpha = 0.7, size = 2) +
+        geom_text(check_overlap = TRUE, hjust = "inward", family = "IBMPlexSans") +
+        labs(color = NULL)
 
 
 
