@@ -43,6 +43,7 @@ cocktails_df <- cocktails_parsed %>%
         na.omit()
 
 # PCA -----------------------------------------------------------------------------------------
+
 library(tidymodels)
 library(tidytext)
 
@@ -81,15 +82,26 @@ tidied_pca %>%
                 y = NULL, fill = "Positive?"
         )
 
+juice(pca_prep) %>%
+        ggplot(aes(PC1, PC3, label = name)) +
+        geom_point(aes(color = category), alpha = 0.7, size = 2) +
+        geom_text(check_overlap = TRUE, hjust = "inward", family = "IBMPlexSans") +
+        labs(color = NULL)
 
 
+# UMAP ----------------------------------------------------------------------------------------
 
 
+library(embed)
 
+umap_rec <- recipe(~., data = cocktails_df) %>%
+        update_role(name, category, new_role = "id") %>%
+        step_normalize(all_predictors()) %>%
+        step_umap(all_predictors())
 
+umap_prep <- prep(umap_rec)
 
-
-
+umap_prep
 
 
 
