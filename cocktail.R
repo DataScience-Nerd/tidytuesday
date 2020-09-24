@@ -1,2 +1,98 @@
-tuesdata <- tidytuesdayR::tt_load('2020-05-26')
-cocktails <- tuesdata$cocktails
+boston_cocktails <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/boston_cocktails.csv")
+
+boston_cocktails %>%
+        count(ingredient, sort = TRUE)
+
+cocktails_parsed <- boston_cocktails %>%
+        mutate(
+                ingredient = str_to_lower(ingredient),
+                ingredient = str_replace_all(ingredient, "-", " "),
+                ingredient = str_remove(ingredient, " liqueur$"),
+                ingredient = str_remove(ingredient, " (if desired)$"),
+                ingredient = case_when(
+                        str_detect(ingredient, "bitters") ~ "bitters",
+                        str_detect(ingredient, "lemon") ~ "lemon juice",
+                        str_detect(ingredient, "lime") ~ "lime juice",
+                        str_detect(ingredient, "grapefruit") ~ "grapefruit juice",
+                        str_detect(ingredient, "orange") ~ "orange juice",
+                        TRUE ~ ingredient
+                ),
+                measure = case_when(
+                        str_detect(ingredient, "bitters") ~ str_replace(measure, "oz$", "dash"),
+                        TRUE ~ measure
+                ),
+                measure = str_replace(measure, " ?1/2", ".5"),
+                measure = str_replace(measure, " ?3/4", ".75"),
+                measure = str_replace(measure, " ?1/4", ".25"),
+                measure_number = parse_number(measure),
+                measure_number = if_else(str_detect(measure, "dash$"),
+                                         measure_number / 50,
+                                         measure_number
+                )
+        ) %>%
+        add_count(ingredient) %>%
+        filter(n > 15) %>%
+        select(-n) %>%
+        distinct(row_id, ingredient, .keep_all = TRUE) %>%
+        na.omit()
+
+cocktails_df <- cocktails_parsed %>%
+        select(-ingredient_number, -row_id, -measure) %>%
+        pivot_wider(names_from = ingredient, values_from = measure_number, values_fill = 0) %>%
+        janitor::clean_names() %>%
+        na.omit()
+
+# PCA -----------------------------------------------------------------------------------------
+library(tidymodels)
+library(tidytext)
+
+pca_rec <- recipe(~., data = cocktails_df) %>%
+        update_role(name, category, new_role = "id") %>%
+        step_normalize(all_predictors()) %>%
+        step_pca(all_predictors())
+
+pca_prep <- prep(pca_rec)
+
+pca_prep
+
+tidied_pca <- tidy(pca_prep, 2)
+
+tidied_pca %>%
+        filter(component %in% paste0("PC", 1:5)) %>%
+        mutate(component = fct_inorder(component)) %>%
+        ggplot(aes(value, terms, fill = terms)) +
+        geom_col(show.legend = FALSE) +
+        facet_wrap(~component, nrow = 1) +
+        labs(y = NULL)
+
+
+tidied_pca %>%
+        filter(component %in% paste0("PC", 1:4)) %>%
+        group_by(component) %>%
+        top_n(8, abs(value)) %>%
+        ungroup() %>%
+        mutate(terms = reorder_within(terms, abs(value), component)) %>%
+        ggplot(aes(abs(value), terms, fill = value > 0)) +
+        geom_col() +
+        facet_wrap(~component, scales = "free_y") +
+        scale_y_reordered() +
+        labs(
+                x = "Absolute value of contribution",
+                y = NULL, fill = "Positive?"
+        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
