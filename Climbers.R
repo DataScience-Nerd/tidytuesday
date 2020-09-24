@@ -108,13 +108,41 @@ glm_rs <- members_wf %>%
 
 glm_rs
 
+rf_rs <- members_wf %>%
+        add_model(rf_spec) %>%
+        fit_resamples(
+                resamples = members_folds,
+                metrics = members_metrics,
+                control = control_resamples(save_pred = TRUE)
+        )
+
+rf_rs
+
 # Evaluate Models -----------------------------------------------------------------------------
 
 collect_metrics(glm_rs)
-glm_rs$.notes
+collect_metrics(rf_rs)
 
+glm_rs %>%
+        conf_mat_resampled()
 
+rf_rs %>%
+        conf_mat_resampled()
 
+glm_rs %>%
+        collect_predictions() %>%
+        group_by(id) %>%
+        roc_curve(died, .pred_died) %>%
+        ggplot(aes(1 - specificity, sensitivity, color = id)) +
+        geom_abline(lty = 2, color = "gray80", size = 1.5) +
+        geom_path(show.legend = FALSE, alpha = 0.6, size = 1.2) +
+        coord_equal()
+
+members_final <- members_wf %>%
+        add_model(glm_spec) %>%
+        last_fit(members_split)
+
+members_final
 
 
 
