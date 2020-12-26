@@ -1,7 +1,5 @@
 library(tidyverse)
 
-
-
 crimes_states<- crimes %>% 
         group_by(`STATE/UT`) %>% 
         summarise(Rape_tot = sum(Rape))
