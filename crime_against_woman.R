@@ -47,10 +47,7 @@ long_tot<- total %>%
 
 long_tot$case <- as.factor(long_tot$case)
 
-NotFancy <- function(l) {
-        l <- format(l, scientific = FALSE)
-        parse(text=l)
-}
+
 long_tot %>% 
         ggplot(aes(Year,crimes_total, fill = case))+
         geom_col()+
