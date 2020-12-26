@@ -54,3 +54,27 @@ long_tot %>%
         scale_y_continuous(labels=comma)+
         coord_flip()+
         facet_wrap(~case)
+
+
+total %>% 
+        group_by(state) %>% 
+        summarise(rap =sum(Rape)) %>% 
+        ggplot(aes(reorder(state,rap), rap))+
+        geom_col(alpha =0.5, fill ="red")+
+        coord_flip()
+
+
+
+total %>% 
+        ggplot(aes(Year, Rape, fill = state))+
+        geom_col()+
+        coord_flip()+
+        facet_wrap(~state)
+
+
+
+
+
+
+
+
