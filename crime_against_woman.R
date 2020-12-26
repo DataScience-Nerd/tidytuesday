@@ -1,24 +1,16 @@
 library(tidyverse)
 
-crimes_states<- crimes %>% 
-        group_by(`STATE/UT`) %>% 
-        summarise(Rape_tot = max(Rape))
-
 crimes %>% 
         count(`STATE/UT`) %>% View()
 
-
 crimes$`STATE/UT`<- toupper(crimes$`STATE/UT`)
 
-crimes_states %>% View()
 crimes$`STATE/UT` <- replace(crimes$`STATE/UT`, crimes$`STATE/UT` == "DELHI UT", "DELHI")
 crimes$`STATE/UT` <- replace(crimes$`STATE/UT`, crimes$`STATE/UT` == "D & N HAVELI", "D&N HAVELI")
 crimes$`STATE/UT` <- replace(crimes$`STATE/UT`, crimes$`STATE/UT` == "A & N ISLANDS", "A&N ISLANDS")
+crimes_states %>% View()
 
-crimes_states %>% 
-        ggplot(aes(reorder(`STATE/UT`, Rape_tot), Rape_tot))+
-        geom_bar(stat = "identity")+
-        coord_flip()
+
 
 crimes_states %>% group_by(`STATE/UT`) %>% 
         summarise(max(Rape_tot))
@@ -32,4 +24,28 @@ crimes %>%
 
 
 total<- crimes %>%
-        filter(DISTRICT == "TOTAL")
+        filter(DISTRICT == "TOTAL" | DISTRICT == "Total District(s)" | DISTRICT =="ZZ TOTAL")
+
+total$Year <- as.factor(total$Year)
+
+total %>% 
+        filter(`STATE/UT` == "KERALA") %>%
+        ggplot(aes(Year, crimes_total))+
+        geom_col(alpha =.5 , fill = "red")+
+        ggtitle("Kerala Rape")
+
+
+
+total<- total %>% 
+        select(state = `STATE/UT`, district=DISTRICT, Year, Rape, kidnap =`Kidnapping and Abduction`,
+               dowry_death = `Dowry Deaths`, assault = `Assault on women with intent to outrage her modesty`,
+               insult_to_modesty =`Insult to modesty of Women`, cruelty = `Cruelty by Husband or his Relatives`,
+               importation =`Importation of Girls`, crimes_total)
+
+
+
+
+
+
+
+
