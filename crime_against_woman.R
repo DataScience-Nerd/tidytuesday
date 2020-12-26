@@ -1,5 +1,5 @@
 library(tidyverse)
-
+library(scales)
 crimes %>% 
         count(`STATE/UT`) %>% View()
 
@@ -42,10 +42,18 @@ total<- total %>%
                insult_to_modesty =`Insult to modesty of Women`, cruelty = `Cruelty by Husband or his Relatives`,
                importation =`Importation of Girls`, crimes_total)
 
+long_tot<- total %>% 
+        pivot_longer(4:10,names_to = "case", values_to = "number")
 
+long_tot$case <- as.factor(long_tot$case)
 
-
-
-
-
-
+NotFancy <- function(l) {
+        l <- format(l, scientific = FALSE)
+        parse(text=l)
+}
+long_tot %>% 
+        ggplot(aes(Year,crimes_total, fill = case))+
+        geom_col()+
+        scale_y_continuous(labels=comma)+
+        coord_flip()+
+        facet_wrap(~case)
