@@ -1,5 +1,8 @@
 library(tidyverse)
 library(scales)
+
+crimes <- read_csv("crimes.csv")
+
 crimes %>% 
         count(`STATE/UT`) %>% View()
 
@@ -8,19 +11,15 @@ crimes$`STATE/UT`<- toupper(crimes$`STATE/UT`)
 crimes$`STATE/UT` <- replace(crimes$`STATE/UT`, crimes$`STATE/UT` == "DELHI UT", "DELHI")
 crimes$`STATE/UT` <- replace(crimes$`STATE/UT`, crimes$`STATE/UT` == "D & N HAVELI", "D&N HAVELI")
 crimes$`STATE/UT` <- replace(crimes$`STATE/UT`, crimes$`STATE/UT` == "A & N ISLANDS", "A&N ISLANDS")
-crimes_states %>% View()
 
-
-
-crimes_states %>% group_by(`STATE/UT`) %>% 
-        summarise(max(Rape_tot))
 
 crimes$crimes_total<- crimes$Rape + crimes$`Dowry Deaths` + crimes$`Kidnapping and Abduction` +crimes$`Assault on women with intent to outrage her modesty` +crimes$`Insult to modesty of Women` + crimes$`Cruelty by Husband or his Relatives` + crimes$`Importation of Girls`
         
 
 crimes %>% 
         ggplot(aes(Year, crimes_total ))+
-        geom_bar(stat = "identity", alpha =.5, fill = "red")
+        geom_bar(stat = "identity", alpha =.5, fill = "red")+
+        scale_y_continuous(labels = comma)
 
 
 total<- crimes %>%
@@ -58,8 +57,8 @@ long_tot %>%
 
 total %>% 
         group_by(state) %>% 
-        summarise(rap =sum(Rape)) %>% 
-        ggplot(aes(reorder(state,rap), rap))+
+        summarise(rape =sum(Rape)) %>% 
+        ggplot(aes(reorder(state,rape), rape))+
         geom_col(alpha =0.5, fill ="red")+
         coord_flip()
 
