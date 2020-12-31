@@ -1,6 +1,7 @@
 library(tidyverse)
 library(scales)
 
+# read File
 crimes <- read_csv("crimes.csv")
 
 crimes %>% 
