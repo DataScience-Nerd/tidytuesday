@@ -1,4 +1,5 @@
 library(tidyverse)
+library(tidymodels)
 # Read ----------------------------------------------------------------------------------------
 
 tuesdata <- tidytuesdayR::tt_load('2020-09-22')
